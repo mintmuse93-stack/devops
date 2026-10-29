@@ -1,0 +1,16 @@
+hadoop fs -mkdir -p /user/cloudera/mydata/raw /user/cloudera/mydata/processed
+hadoop fs -ls /user/cloudera
+cat > students.txt <<'EOF'
+1,kriti,cse,45
+2,neha,ece,56
+3,jyothi,ce,78
+4,priya,mechanical,89
+EOF
+echo "First file line 1" > first.txt
+echo "Second file line 1" > second.txt
+hadoop fs -copyFromLocal students.txt /user/cloudera/mydata/raw/
+hadoop fs -ls /user/cloudera/mydata/raw
+hadoop fs -cat /user/cloudera/mydata/raw/students.txt
+hadoop fs -ls /user/cloudera/mydata
+hadoop fs -copyToLocal /user/cloudera/mydata/raw/students.txt ./students_from_hdfs.txt
+cat students_from_hdfs.txt
