@@ -1,0 +1,40 @@
+//In cloudera
+hadoop fs -mkdir -p /home/cloudera/hive_lab/input
+cat>input.txt<<'EOF'
+2025-11-03,User1,Age=21;state=CA;gender=M;
+2025-11-03,User2,Age=25;state=TX;gender=F;
+2025-11-03,User3,Age=32;state=CA;gender=M;
+2025-11-03,User4,Age=18;state=NY;gender=F;
+2025-11-03,User5,Age=40;state=TX;gender=M;
+NULL,NULL
+hadoop fs -copyFromLocal input.txt /home/cloudera/hive_lab/input
+//In Hive
+CREATE DATABASE IF NOT EXISTS user_analysis;
+USE user_analysis;
+CREATE EXTERNAL TABLE IF NOT EXISTS userdata (
+ data_date STRING,
+ user_id STRING,
+ properties STRING
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE
+LOCATION '/home/cloudera/hive_lab/input';
+
+SHOW TABLES;
+SELECT * FROM userdata;
+
+CREATE TABLE userdata_parsed AS
+SELECT
+ data_date,
+ user_id,
+ regexp_extract(properties, 'Age=([0-9]+)', 1) AS age,
+ regexp_extract(properties, 'state=([A-Z]+)', 1) AS state,
+ regexp_extract(properties, 'gender=([A-Z]+)', 1) AS gender
+FROM userdata;
+SELECT * FROM userdata_parsed;
+SELECT state, COUNT(*) AS user_count
+FROM userdata_parsed
+WHERE state IS NOT NULL
+GROUP BY state;
+
